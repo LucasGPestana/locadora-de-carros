@@ -9,6 +9,8 @@ localStorage = localStoragePy("./banco", storage_backend="json")
 carros = json.loads(localStorage.getItem("carrosCadastrados")) if localStorage.getItem("carrosCadastrados") else []
 funcionarios = json.loads(localStorage.getItem("funcionariosCadastrados")) if localStorage.getItem("funcionariosCadastrados") else [vars(Funcionario("Roberto", "11111111111", "abcd1"))]
 
+Carro.qtdCarros = json.loads(localStorage.getItem("contIdentificador"))[0] if localStorage.getItem("contIdentificador") else 0
+
 # Converte as listas com dicionários para listas de objeto Carro e Funcionario
 carros = [Carro(**atributosCarro) for atributosCarro in carros]
 funcionarios = [Funcionario(**atributosFuncionario) for atributosFuncionario in funcionarios]
@@ -56,9 +58,12 @@ def inserirCarro(funcionario, modelo, marca, precoAlugel, qtdEstoque, respLabel)
 
         if not existCar(modelo.get(), carros):
 
+          Carro.qtdCarros += 1
+
           # vars converte o objeto Carro em um dicionário cujas chaves são os atributos e os valores são os valores dos atributos associados
           funcionario.inserirCarro(modelo.get(), marca.get(), float(precoAlugel.get().replace(",", ".")), int(qtdEstoque.get()), carros)
           localStorage.setItem("carrosCadastrados", json.dumps([vars(carro) for carro in carros]))
+          localStorage.setItem("contIdentificador", json.dumps([Carro.qtdCarros]))
 
           limparCampos(modelo=modelo, 
                       marca=marca, 
@@ -67,6 +72,8 @@ def inserirCarro(funcionario, modelo, marca, precoAlugel, qtdEstoque, respLabel)
           
           respLabel.config(fg=CORES["Verde"])
           respLabel["text"] = "Carro cadastrado com sucesso!"
+
+          modelo.focus()
         
         else:
 
@@ -98,7 +105,9 @@ def consultarCarros(funcionario, filtro, valorFiltro, respLabel):
 
     carrosEncontrados = funcionario.consultarCarros(carros, filtro, valorFiltro)
 
-    if carrosEncontrados == "" and valorFiltro != "":
+    # Primeira condição (antes do 'or') serve para os casos em que o valor do filtro foi definido, mas nenhum carro com esse filtro for encontrado em pesquisar por carro
+    # Segunda condição (depois do 'or')serve para a tela de remoção de carros, no qual é obrigatório que o valor do filtro (identificador, nese caso) seja definido. Caso contrário, uma mensagem de erro é lançada
+    if (carrosEncontrados == "" and valorFiltro != "") or (filtro == "identificador" and valorFiltro == ""):
       
       respLabel.config(fg=CORES["Vermelho"])
       respLabel["text"] = "Não foi encontrado nenhum carro com essas especificações!"
@@ -142,6 +151,8 @@ def pegarInfoCarro(identificador, respLabel, **kwargs):
 
   global carros
 
+  limparCampos(**kwargs)
+
   if carros:
 
     carroEscolhido = Funcionario.buscarPorId(identificador.get(), carros)
@@ -155,7 +166,7 @@ def pegarInfoCarro(identificador, respLabel, **kwargs):
     else:
 
       respLabel.config(fg=CORES["Vermelho"])
-      respLabel["Text"] = "Não existe um carro com esse identificador!"
+      respLabel["text"] = "Não existe um carro com esse identificador!"
   
   else:
 

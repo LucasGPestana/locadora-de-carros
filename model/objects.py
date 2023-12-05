@@ -44,6 +44,8 @@ class Usuario():
       if str(getattr(carro, "identificador")) == ident:
 
         return carro
+    
+    return None
 
 class Cliente(Usuario):
 
@@ -95,8 +97,6 @@ class Carro():
   qtdCarros = 0
 
   def __init__(self, modelo, marca, precoAlugel, quantidadeEstoque, identificador=0):
-
-    Carro.qtdCarros += 1
 
     self.identificador = identificador or Carro.qtdCarros
     self.modelo = modelo
