@@ -3,6 +3,10 @@ import sys, os
 # Adiciona o diretório do projeto no PYTHONPATH para procurar pelos módulos
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+# Instala automaticamente as dependências necessárias para rodar o código
+os.chdir(os.path.dirname(os.path.dirname(__file__)))
+os.system("pip install -r requirements.txt")
+
 import tkinter as tk
 from model.constants import CORES
 from view.janelaClientes import rodarTelaClientes
